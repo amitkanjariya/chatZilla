@@ -16,8 +16,8 @@ model User{
   hashedPassword String?
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
-  conversationsIds String[] @db.ObjectId
-  conversations Conversation[] @relation(fields: [conversationsIds], references: [id])
+  conversationIds String[] @db.ObjectId
+  conversations Conversation[] @relation(fields: [conversationIds], references: [id])
   seenMessageIds String[] @db.ObjectId
   sendmessages Message[] @relation("Seen", fields: [seenMessageIds], references: [id])
   accounts Account[]
