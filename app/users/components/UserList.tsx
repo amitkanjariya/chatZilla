@@ -3,10 +3,10 @@ import { User } from "@prisma/client";
 import UserBox from "./UserBox";
 
 interface UserListProps{
-    items: User[],
+    users: User[],
 }
 
-const UserList: React.FC<UserListProps> = ({items}) => {
+const UserList: React.FC<UserListProps> = ({users}) => {
     return(
         <aside className="fixed inset-y-0 pb-20 lg:pb-0 lg:left-20 lg:w-80 lg:block overflow-y-auto border-r border-gray-200 block w-full left-0">
             <div className="px-5">
@@ -15,10 +15,10 @@ const UserList: React.FC<UserListProps> = ({items}) => {
                         People
                     </div>
                 </div>
-                {items.map((item) => (
+                {users.map((user) => (
                     <UserBox
-                        key={item.id}
-                        data={item}
+                        key={user.id}
+                        user={user}
                     />
                 ))}
             </div>
