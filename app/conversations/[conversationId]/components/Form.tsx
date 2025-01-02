@@ -52,7 +52,10 @@ const Form = () => {
                 options={{
                     maxFiles: 1,
                 }}
-                onUpload={handleUpload}
+                onUpload={(result) => {
+                    console.log('Upload Button Triggered');
+                    handleUpload(result);
+                }}
                 uploadPreset="pnhbtfs3"
             >
                 <HiPhoto size={30} className="text-sky-500" />
