@@ -7,7 +7,11 @@ export default {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      maxWidth: {
+        '60%': '60%',
+      },
+    },
   },
   plugins: [
     require("@tailwindcss/forms")({

@@ -52,7 +52,7 @@ const Form = () => {
                 options={{
                     maxFiles: 1,
                 }}
-                onUpload={(result) => {
+                onSuccess={(result) => {
                     console.log('Upload Button Triggered');
                     handleUpload(result);
                 }}

@@ -5,7 +5,7 @@ import axios from "axios";
 import { CldUploadButton } from "next-cloudinary";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { FC, useState } from "react";
+import { useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import Modal from "../Modal";
@@ -18,7 +18,7 @@ interface SettingsModalProps {
   currentUser: User;
 }
 
-const SettingsModal: FC<SettingsModalProps> = ({ isOpen, onClose, currentUser }) => {
+const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, currentUser }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,6 +38,7 @@ const SettingsModal: FC<SettingsModalProps> = ({ isOpen, onClose, currentUser })
   const image = watch("image");
 
   const handleUpload = (result: any) => {
+    console.log('Upload result:', result);
     setValue("image", result?.info?.secure_url, {
       shouldValidate: true,
     });
@@ -80,15 +81,20 @@ const SettingsModal: FC<SettingsModalProps> = ({ isOpen, onClose, currentUser })
                     className="rounded-full"
                   />
                   <CldUploadButton
-                    options={{
-                      maxFiles: 1,
+                    options={{ maxFiles: 1 }}
+                    onSuccess={(result) => {
+                      console.log('Upload Button Triggered');
+                      handleUpload(result);
                     }}
-                    onUpload={handleUpload}
-                    uploadPreset="weopayd7"
+                    uploadPreset="pnhbtfs3"
+                    className="inline-block"
                   >
-                    <Button disabled={isLoading} secondary type="button">
-                      Change
-                    </Button>
+                    {/* Use a div or span wrapper instead of nesting another button */}
+                    <div>
+                      <Button disabled={isLoading} secondary type="button">
+                        Change
+                      </Button>
+                    </div>
                   </CldUploadButton>
                 </div>
               </div>

@@ -9,67 +9,80 @@ import Image from "next/image";
 import { useState } from "react";
 import ImageModal from "./ImageModal";
 
-interface MessageBoxProps{
-    isLast : boolean;
+interface MessageBoxProps {
+    isLast: boolean;
     message: FullMessageType;
 }
 
-const MessageBox : React.FC<MessageBoxProps> = ({isLast, message}) => {
-    const session = useSession();
+const MessageBox: React.FC<MessageBoxProps> = ({ isLast, message }) => {
+    const { data: session } = useSession();
     const [imageModalOpen, setImageModalOpen] = useState(false);
-    const isOwn = session?.data?.user?.email === message?.sender?.email;
+    const isOwn = session?.user?.email === message?.sender?.email;
 
     const seenList = (message?.seen || [])
         .filter((user) => user.email !== message?.sender?.email)
         .map((user) => user.name)
         .join(", ");
 
-    const container = clsx("flex gap-3 p-4", isOwn && "justify-end");
-    const avatar = clsx(isOwn && "order-2");
-    const body = clsx("flex flex-col gap-2", isOwn && "items-end");
-	const messageContainer = clsx(
-		"text-sm w-fit overflow-hidden",
-		isOwn ? "text-white bg-sky-500" : "bg-gray-100",
-		message?.image ? "rounded-md p-0" : "rounded-full py-2 px-3"
-	);
+    const container = clsx(
+        "flex gap-3 py-2 px-3 items-end",
+        isOwn ? "justify-end" : "justify-start"
+    );
 
-    return(
+    const avatar = clsx("w-8 h-8", isOwn && "order-2");
+    const body = clsx(
+        "flex flex-col space-y-1 max-w-[60%]",
+        isOwn ? "items-end" : "items-start"
+    );
+
+    const bubble = clsx(
+        "px-4 py-2 text-sm shadow-md rounded-lg",
+        isOwn
+            ? "bg-blue-500 text-white rounded-br-none"
+            : "bg-gray-200 text-gray-900 rounded-bl-none"
+    );
+
+    return (
         <div className={container}>
-			<div className={avatar}>
-				<Avatar user={message?.sender} />
-			</div>
-			<div className={body}>
-				<div className="flex items-center gap-1">
-					<div className="text-sm text-gray-500">{message?.sender?.name}</div>
-					<div className="text-xs text-gray-400">
-						{format(new Date(message?.createdAt), "p")}
-					</div>
-				</div>
-				<div className={messageContainer}>
-					<ImageModal
-						src={message?.image}
-						isOpen={imageModalOpen}
-						onClose={() => setImageModalOpen(false)}
-					/>
-					{message?.image ? (
-						<Image
-							onClick={() => setImageModalOpen(true)}
-							alt="Image"
-							height={288}
-							width={288}
-							src={message?.image}
-							className="object-cover cursor-pointer hover:scale-110 transition translate"
-						/>
-					) : (
-						<div>{message?.body}</div>
-					)}
-				</div>
-				{isLast && isOwn && seenList.length > 0 && (
-					<div className="text-xs font-light text-gray-500">{`Seen by ${seenList}`}</div>
-				)}
-			</div>
-		</div>
-    )
-}
+            {!isOwn && (
+                <div className={avatar}>
+                    <Avatar user={message?.sender} />
+                </div>
+            )}
+            <div className={body}>
+                <div className="flex items-center gap-1 text-xs text-gray-400">
+                    <span>{message?.sender?.name}</span>
+                    <span>{format(new Date(message?.createdAt), "p")}</span>
+                </div>
+                <div className={bubble}>
+                    {message?.image ? (
+                        <>
+                            <ImageModal
+                                src={message?.image}
+                                isOpen={imageModalOpen}
+                                onClose={() => setImageModalOpen(false)}
+                            />
+                            <Image
+                                onClick={() => setImageModalOpen(true)}
+                                alt="Image"
+                                height={288}
+                                width={288}
+                                src={message?.image}
+                                className="object-cover cursor-pointer hover:scale-110 transition"
+                            />
+                        </>
+                    ) : (
+                        <div>{message?.body}</div>
+                    )}
+                </div>
+                {isLast && isOwn && seenList.length > 0 && (
+                    <div className="text-xs text-gray-400 mt-1">
+                        {`Seen by ${seenList}`}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
 
 export default MessageBox;
