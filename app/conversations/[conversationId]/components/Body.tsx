@@ -7,7 +7,7 @@ import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { find } from "lodash";
 import MessageBox from "./MessageBox";
-import { format } from "date-fns";
+import { format, isToday, isYesterday } from "date-fns";
 
 interface BodyProps {
     initialMessages: FullMessageType[];
@@ -25,6 +25,7 @@ const Body: React.FC<BodyProps> = ({ initialMessages }) => {
     useEffect(() => {
         pusherClient.subscribe(conversationId);
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+
         const messageHandler = (message: FullMessageType) => {
             axios.post(`/api/conversations/${conversationId}/seen`);
             setMessages((messages) => {
@@ -55,21 +56,33 @@ const Body: React.FC<BodyProps> = ({ initialMessages }) => {
     // Group messages by date
     const groupedMessages = messages.reduce<Record<string, FullMessageType[]>>(
         (acc, message) => {
-            const date = format(new Date(message.createdAt), "dd-MM-yyyy");
-            if (!acc[date]) acc[date] = [];
-            acc[date].push(message);
+            const messageDate = new Date(message.createdAt);
+            const dateKey = format(messageDate, "yyyy-MM-dd");
+            if (!acc[dateKey]) acc[dateKey] = [];
+            acc[dateKey].push(message);
             return acc;
         },
         {}
     );
 
+    const formatDateHeader = (date: string) => {
+        const messageDate = new Date(date);
+        if (isToday(messageDate)) {
+            return "Today";
+        } else if (isYesterday(messageDate)) {
+            return "Yesterday";
+        } else {
+            return format(messageDate, "dd-MM-yyyy");
+        }
+    };
+
     return (
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto px-4">
             {Object.entries(groupedMessages).map(([date, messages]) => (
                 <React.Fragment key={date}>
                     {/* Date Separator */}
-                    <div className="text-sm text-gray-400 bg-gray-800 rounded-md px-2 py-1 mx-auto w-fit my-4 ">
-                        {date}
+                    <div className="text-sm text-gray-500 bg-gray-200 rounded-md px-2 py-1 mx-auto w-fit my-4">
+                        {formatDateHeader(date)}
                     </div>
                     {/* Messages for this date */}
                     {messages.map((message, index) => (

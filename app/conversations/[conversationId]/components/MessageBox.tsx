@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useState } from "react";
 import ImageModal from "./ImageModal";
+import { BsCheck, BsCheckAll } from "react-icons/bs"; // Checkmark icons
 
 interface MessageBoxProps {
     isLast: boolean;
@@ -24,36 +25,64 @@ const MessageBox: React.FC<MessageBoxProps> = ({ isLast, message }) => {
         .map((user) => user.name)
         .join(", ");
 
+    const isSeen = seenList.length > 0; // Check if the message is seen
+
+    // Container for the entire message
     const container = clsx(
-        "flex gap-3 py-2 px-3 items-end",
+        "flex gap-2 p-1 items-end",
         isOwn ? "justify-end" : "justify-start"
     );
 
-    const avatar = clsx("w-8 h-8", isOwn && "order-2");
+    // Avatar alignment
+    const avatar = clsx(isOwn && "order-2");
+
+    // Message Body Alignment
     const body = clsx(
-        "flex flex-col space-y-1 max-w-[60%]",
+        "flex flex-col gap-1 max-w-[70%]",
         isOwn ? "items-end" : "items-start"
     );
 
+    // Bubble styling
     const bubble = clsx(
-        "px-4 py-2 text-sm shadow-md rounded-lg",
+        "relative text-base shadow-md rounded-lg px-3 py-2", // Increased text size and padding
         isOwn
-            ? "bg-blue-500 text-white rounded-br-none"
-            : "bg-gray-200 text-gray-900 rounded-bl-none"
+            ? "bg-blue-500 text-white rounded-br-none pr-16"
+            : "bg-gray-200 text-gray-900 rounded-bl-none pr-12",
+        message?.image ? "pr-3 overflow-hidden" : ""
+    );
+
+    // Image Wrapper
+    const imageWrapper = clsx(
+        "relative max-w-[300px] w-auto rounded-md border border-gray-200 overflow-hidden",
+        "transition-transform duration-300 cursor-pointer"
+    );
+
+    // Time and Checkmarks inside the bubble
+    const timeAndCheckWrapper = clsx(
+        "absolute bottom-1 right-2 flex items-center gap-1 text-[10px]", // Increased font size
+        isOwn ? "text-gray-100" : "text-gray-500",
+        message?.image ? "right-4 bottom-2"  : ""
     );
 
     return (
         <div className={container}>
+            {/* Avatar (for received messages only) */}
             {!isOwn && (
                 <div className={avatar}>
                     <Avatar user={message?.sender} />
                 </div>
             )}
+
+            {/* Message Body */}
             <div className={body}>
-                <div className="flex items-center gap-1 text-xs text-gray-400">
-                    <span>{message?.sender?.name}</span>
-                    <span>{format(new Date(message?.createdAt), "p")}</span>
-                </div>
+                {/* Sender Name (for received messages only) */}
+                {!isOwn && (
+                    <div className="text-xs text-gray-400">
+                        {message?.sender?.name}
+                    </div>
+                )}
+
+                {/* Message Bubble */}
                 <div className={bubble}>
                     {message?.image ? (
                         <>
@@ -62,24 +91,33 @@ const MessageBox: React.FC<MessageBoxProps> = ({ isLast, message }) => {
                                 isOpen={imageModalOpen}
                                 onClose={() => setImageModalOpen(false)}
                             />
-                            <Image
-                                onClick={() => setImageModalOpen(true)}
-                                alt="Image"
-                                height={288}
-                                width={288}
-                                src={message?.image}
-                                className="object-cover cursor-pointer hover:scale-110 transition"
-                            />
+                            <div className={imageWrapper}>
+                                <Image
+                                    onClick={() => setImageModalOpen(true)}
+                                    alt="Message Image"
+                                    src={message?.image}
+                                    width={300}
+                                    height={300}
+                                    className="object-cover"
+                                />
+                            </div>
                         </>
                     ) : (
-                        <div>{message?.body}</div>
+                        <div className="break-words">{message?.body}</div>
                     )}
-                </div>
-                {isLast && isOwn && seenList.length > 0 && (
-                    <div className="text-xs text-gray-400 mt-1">
-                        {`Seen by ${seenList}`}
+
+                    {/* Time and Seen Status (Inside Bubble) */}
+                    <div className={timeAndCheckWrapper}>
+                        <span>{format(new Date(message?.createdAt), "HH:mm")}</span>
+                        {isOwn && (
+                            isSeen ? (
+                                <BsCheckAll className="text-gray-100 text-sm" />
+                            ) : (
+                                <BsCheck className="text-gray-100 text-sm" />
+                            )
+                        )}
                     </div>
-                )}
+                </div>
             </div>
         </div>
     );
