@@ -17,11 +17,15 @@ model User{
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
   conversationIds String[] @db.ObjectId
+  pinnedConversationIds String[] @db.ObjectId
   conversations Conversation[] @relation(fields: [conversationIds], references: [id])
   seenMessageIds String[] @db.ObjectId
   sendmessages Message[] @relation("Seen", fields: [seenMessageIds], references: [id])
   accounts Account[]
   messages Message[]
+  isVerified Boolean @default(false)
+  verificationToken String?       
+  verificationTokenExpiry DateTime? 
 }
 
 model Account{
@@ -66,3 +70,11 @@ model Message{
   sender User @relation(fields: [senderId], references: [id], onDelete:Cascade)
 }
 
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
